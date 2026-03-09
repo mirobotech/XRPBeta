@@ -20,7 +20,7 @@ After installing MicroPython on the controller, the RPI-RP2 drive will eject its
 
 ## Copying the XRPBeta.py board module file into the Raspberry Pi Pico W
 
-1. Configure your Python IDE for use with Raspberry Pi Pico. For first time users, we suggest [Thonny]().
+1. Configure your Python IDE for use with Raspberry Pi Pico. For first time users, we suggest [Thonny](https://thonny.org) as an easy way to get started.
 2. Connect the XRPBeta controller to your computer and connect to its Raspberry Pi Pico through the IDE.
 2. Open the XRPBeta.py board module file in the IDE.
 4. Save the XRPBeta.py file to into the memory of the connected Raspberry Pi Pico in your XRPBeta controller.
