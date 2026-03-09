@@ -14,7 +14,7 @@ Before getting started with it you should know:
 - you're encouraged to modify the code to make it work better for you!
 
 XRPBeta hardware notes:
-- The user button uses an internal pull-up resistor (so pressed == 0)
+- The USER button uses an internal pull-up resistor (so pressed == 0)
 - Motors use phase/enable control:
     - Phase pin sets direction (1 = forward, 0 = reverse)
     - Enable pin sets speed using PWM (0-65535, where 65535 = full speed)
