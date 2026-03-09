@@ -122,7 +122,7 @@ def left_motor(speed):
 
 def right_motor(speed):
     # Set right motor speed: -100 (full reverse) to +100 (full forward), 0 = stop.
-    set_motor(MOT_R_PH, MOT_R_EN, speed)
+    set_motor(MOT_R_PH, MOT_R_EN, -speed)
 
 def motor3(speed):
     # Set auxiliary motor 3 speed: -100 to +100, 0 = stop.
