@@ -1,6 +1,6 @@
 """
 XRPBeta.py
-March 9, 2026
+March 22, 2026
 
 Board support module for the XRP (Experiential Robotics Platform) Beta.
 
@@ -19,6 +19,8 @@ XRPBeta hardware notes:
     - Phase pin sets direction (1 = forward, 0 = reverse)
     - Enable pin sets speed using PWM (0-65535, where 65535 = full speed)
 - Motor encoders count shaft rotations for precise distance/speed control
+- Servo constants are set for 180-degree servos (500-2500us pulse range);
+    adjust SERVO_MIN_US, SERVO_MAX_US, and SERVO_RANGE for other servo types
 - The IMU (inertial measurement unit) is on I2C address 0x6B
 """
 
@@ -303,38 +305,39 @@ RANGE_ECHO_PIN = const(21)  # SONAR echo input
 SONAR_TRIG = Pin(RANGE_TRIG_PIN, Pin.OUT, value=0)
 SONAR_ECHO = Pin(RANGE_ECHO_PIN, Pin.IN)
 
-def sonar_range(max=300):
+def sonar_range(_max_range=100):
     # Returns either:
-    #  distance (cm) - target detected within max range
-    #  0             - no target within max range
-    #  -1            - time-out waiting for ECHO to end
-    #  -2            - time-out waiting for ECHO to start
-    #  -3            - previous ECHO still in progress
+    #  distance (cm) - closest target within _max_range
+    #  0             - no target detected within _max_range
+    #  -1            - time-out waiting for ECHO to start
+    #  -2            - previous ECHO is still in progress
 
+    # Return -2 if a previous ECHO pulse is still in progress
     if SONAR_ECHO.value() == 1:
-        # Check if previous ECHO is in progress, return error if so
-        return -3   # (wait 10ms after ECHO ends before re-triggering)
-
-    # Create a TRIG pulse
+        return -2   # (wait 10ms after ECHO ends before re-triggering)
+  
+    # Make a 10us TRIG pulse to start a range measurement
     SONAR_TRIG.value(1)
     time.sleep_us(10)
     SONAR_TRIG.value(0)
 
-    # Wait 2500us for ECHO pulse to start. Note: HC-SR04P (3.3V-capable
-    # modules also labelled as RCWL-9610A 2022) delay for approximately
-    # 2300us after the TRIG pulse ends and the ECHO pulse starts.
+    # Wait up to 2500us for ECHO pin to go high after TRIG.
+    # (Necessary for 3.3V HC-SR04P/RCWL-9610A SONAR modules.)
     duration = machine.time_pulse_us(SONAR_ECHO, 0, 2500)
-
+    # time_pulse_us() returns a negative value if ECHO did not start.
     if duration < 0:
-        # ECHO didn't start - return time_pulse_us() error (-2, -1)
-        return duration
+        return -1
 
-    # Time ECHO pulse. Set time-out value to max range.
-    duration = machine.time_pulse_us(SONAR_ECHO, 1, (max + 1) * 58)
+    # Measure ECHO pulse duration. Time-out value is set to round-trip
+    # time for max_range plus 1cm, in microseconds. (~29us/cm one way)
+    duration = machine.time_pulse_us(SONAR_ECHO, 1, (_max_range + 1) * 58)
+    
+    # time_pulse_us() returns a negative value if ECHO times out (no
+    # target within _max_range)
     if duration < 0:
-        return 0    # Distance > max range
+        return 0
 
-    # Calculate target distance in cm
+    # Convert round trip ECHO time to distance
     return duration / 58
 
 
