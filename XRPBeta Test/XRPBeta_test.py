@@ -1,6 +1,6 @@
 """
 XRPBeta_test.py
-March 9, 2026
+March 2026
 
 Hardware test program for the XRPBeta robot circuit.
 
@@ -44,7 +44,7 @@ def wait_for_button_blinking():
     print("  Press USER button to continue...")
     while not button_pressed():
         pico_led_toggle()
-        time.sleep_ms(200)
+        time.sleep_ms(250)
     pico_led_off()                  # Make sure LED is off when done
     time.sleep_ms(50)               # Debounce delay
     while button_pressed():         # Wait for button release
@@ -69,8 +69,7 @@ def test_startup():
     print_divider()
     voltage = battery_voltage()
     print(f"  Battery voltage: {voltage:.2f} V")
-    if voltage < 4.4:
-        # 4.4V threshold for NiMH batteries - set for your battery type
+    if voltage < 3.5:
         print("  WARNING: Battery voltage is low - consider recharging!")
     else:
         print("  Battery voltage OK.")
@@ -171,8 +170,8 @@ def test_servos():
     print("  NOTE: Skip this stage if no servos are connected.")
     wait_for_button()
 
-    positions = [90, 0, 180, 90]    # Centre (90°), min, max, back to centre
-    labels    = ["centre (90°)", "0°", "180°", "centre (90°)"]
+    positions = [45, 0, 90, 45]    # Centre (45°), min, max, back to centre
+    labels    = ["centre (45°)", "0°", "90°", "centre (45°)"]
 
     for angle, label in zip(positions, labels):
         print(f"  Moving servos to {label}...")
@@ -228,8 +227,10 @@ def test_sonar():
                 print(f"  Distance: {distance:6.1f} cm")
             elif distance == 0:
                 print("  Distance: out of range")
+            elif distance == -1:
+                print("  Distance: error - SONAR ECHO did not start")
             else:
-                print(f"  Distance: error ({distance})")
+                print("  Distance: error - previous ECHO still in progress")
             last_print = time.ticks_ms()
 
     # Wait for button release before continuing
